@@ -16,11 +16,8 @@ class ModerationResult:
 
     @property
     def test_emoji(self) -> str:
-        if self.score >= 8:
-            return "🔴"
-        if self.score >= 5:
-            return "🟡"
-        return "🟢"
+        score = min(10, max(0, round(self.score)))
+        return chr(0x30 + score) + "\ufe0f\u20e3" if score < 10 else "🔟"
 
 
 def _to_float(value: Any) -> float:
@@ -39,8 +36,7 @@ def build_result(response: Any) -> ModerationResult:
         raw = vars(raw)
 
     categories = {str(k): _to_float(v) for k, v in raw.items()}
-    # Use the highest category score as the risk signal. This avoids averaging
-    # unrelated categories and makes a severe single-category result visible.
+    # The score is the highest category score converted to 0-10.
     peak = max(categories.values(), default=0.0)
     flagged = bool(getattr(item, "flagged", False))
     return ModerationResult(score=round(peak * 10, 2), categories=categories, flagged=flagged)
