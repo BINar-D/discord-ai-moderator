@@ -1,3 +1,5 @@
+import datetime
+
 import discord
 
 
@@ -42,7 +44,8 @@ class ModerationReviewView(discord.ui.View):
             await interaction.response.send_message("Пользователь больше не является участником сервера.", ephemeral=True)
             return
         try:
-            await self.message.author.timeout(discord.utils.utcnow() + discord.timedelta(minutes=self.timeout_minutes), reason="AI moderation: moderator decision")
+            until = discord.utils.utcnow() + datetime.timedelta(minutes=self.timeout_minutes)
+            await self.message.author.timeout(until, reason="AI moderation: moderator decision")
             action = f"timeout_{self.timeout_minutes}m"
         except discord.HTTPException as exc:
             action = f"timeout_failed: {exc}"
